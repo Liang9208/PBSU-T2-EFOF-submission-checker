@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>T2 EFOF Submission Checker</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f7f6f2;--card:#fff;--line:#ddd8cf;--text:#1f1f1f;--muted:#66615a;
+  --ok:#087a31;--bad:#c62828;--warn:#b36b00;--blue:#1f5eff;
+  --softBad:#fff1f1;--softOk:#effaf2;--softWarn:#fff7e8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+header{max-width:960px;margin:0 auto;padding:18px 6px 12px;background:transparent;border-bottom:0}
+h1{margin:0 0 8px;font-size:22px;font-weight:800;letter-spacing:-.02em}
+p{margin:0;color:var(--muted);line-height:1.45;font-size:14px}
+.wrap{max-width:960px;margin:0 auto;padding:14px 6px 28px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px;box-shadow:none}
+label{display:block;font-weight:800;margin-bottom:8px;font-size:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4}
+input[type=file],select,input[type=text],input[type=date]{width:100%;padding:10px 12px;border:1px solid #d5d0c7;border-radius:6px;background:#fff;font-size:13px;min-height:36px}
+input[type=file]{padding:7px 10px}
+button{border:0;border-radius:6px;padding:10px 14px;font-weight:800;cursor:pointer;background:#1f5eff;color:#fff;white-space:nowrap}
+button.secondary{background:#eef2ff;color:#1f3ca6}
+button.gray{background:#efefef;color:#2b2b2b;border:1px solid #ded9cf}
+button:hover{filter:brightness(.98)}
+.controls{display:grid;grid-template-columns:1.1fr 1fr .9fr auto auto;gap:8px;align-items:end}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.stat{background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px}.stat b{display:block;font-size:22px;margin-top:5px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+th,td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
+th{background:#f2f0ea;text-align:left;font-size:11px;letter-spacing:.02em;text-transform:uppercase;color:#514d47;position:sticky;top:0;z-index:2}
+tr:last-child td{border-bottom:0}tr.status-submitted{background:var(--softOk)}tr.status-not{background:var(--softBad)}tr.status-possible{background:var(--softWarn)}
+.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:800;font-size:12px;margin:2px 4px 2px 0}.pill.ok{background:#dff5e6;color:#0e6f31}.pill.bad{background:#ffe0e0;color:#a11919}.pill.warn{background:#ffedcb;color:#8a5300}.pill.gray{background:#eef1f5;color:#4a5365}
+.small{font-size:12px;color:var(--muted);line-height:1.45}.matchbox{border-left:3px solid #d8d3ca;padding-left:8px;margin:4px 0}.hidden{display:none!important}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.err{padding:10px;background:#fff1f1;border:1px solid #ffcaca;border-radius:6px;color:#991b1b;margin-top:10px;white-space:pre-wrap}.success{padding:10px;background:#eefaf2;border:1px solid #bce7c7;border-radius:6px;color:#116b30;margin-top:10px}
+.sectionTitle{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}details{margin-top:12px}summary{cursor:pointer;font-weight:700;color:#34415b}.footerNote{margin-top:14px;font-size:12px;color:#657189;line-height:1.45}
+@media(max-width:980px){header,.wrap{max-width:100%;padding-left:14px;padding-right:14px}.grid,.controls,.stats{grid-template-columns:1fr}.card{padding:14px}table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
+</style>
+</head>
+<body>
+<header><h1>T2 EFOF Submission Checker</h1><p>Upload PBSU T2 EFOF Data + CAS REQ EFOF export, select one PBSU date tab, then check which TL/officer already submitted EFOF.</p></header>
+<div class="wrap">
+  <div class="grid">
+    <div class="card"><label>1) PBSU T2 EFOF Data.xlsx</label><input id="pbsuFile" type="file" accept=".xlsx,.xls" /><div class="hint">Website will read all date tabs and let you select one tab only.</div><div id="pbsuInfo"></div></div>
+    <div class="card"><label>2) CAS REQ - EFOF PREBOARD T2 export.xlsx</label><input id="casFile" type="file" accept=".xlsx,.xls" /><div class="hint">Uses CAS columns C Submitted By, H Submitted On, J Staff Employee ID, K Flight Date, L Flight, O Gate.</div><div id="casInfo"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="controls">
+      <div><label>Select PBSU date</label><input id="datePicker" type="date" disabled /><select id="sheetSelect" class="hidden"><option value="">Upload PBSU file first</option></select><div id="selectedSheetHint" class="hint">Upload PBSU file first</div></div>
+      <div><label>Search / filter</label><input id="searchBox" type="text" placeholder="Flight, gate, TL, submitter..." /></div>
+      <div><label>Result filter</label><select id="statusFilter"><option value="all">All results</option><option value="not">Only not submitted</option><option value="possible">Only possible match</option><option value="submitted">Only submitted</option></select></div>
+      <button id="runBtn">Check EFOF</button><button id="copyBtn" class="secondary">Copy chase list</button>
+    </div>
+    <div class="toolbar"><button id="toggleSubmittedBtn" class="gray">Hide submitted rows</button><button id="exportCsvBtn" class="gray">Export result CSV</button></div>
+    <div id="msg"></div>
+  </div>
+  <div id="stats" class="stats hidden"></div>
+  <div id="resultArea" class="hidden">
+    <div class="sectionTitle"><h2 style="margin:0;font-size:20px">Result</h2><div class="small">Submitted rows are shown by default. Click Hide submitted rows to focus on TL to chase.</div></div>
+    <table id="resultTable"><thead><tr><th>#</th><th>Status</th><th>PBSU Date</th><th>STD</th><th>Flight</th><th>Gate</th><th>TL / Team</th><th>Matched CAS submission</th><th>Issue / Reason</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="footerNote">Matching logic: Flight + Gate + Date. Date allows ±1 day. TL match counts if PBSU TL name matches CAS Submitted By column C or Staff Employee ID column J. If same submitter submitted duplicate entries, latest Submitted On is used.</div>
+</div>
+<script>
+let pbsuWb=null, casWb=null, casRows=[], resultRows=[], showSubmitted=true, pbsuSheetDates=[];
+const el=id=>document.getElementById(id);
+function showMsg(txt,type='success'){el('msg').innerHTML=txt?`<div class="${type}">${txt}</div>`:''}
+function normText(v){return String(v??'').replace(/\s+/g,' ').trim()}
+function normName(v){return normText(v).toUpperCase().replace(/\b(A\/L|A\/P|BIN|BTE|S\/O|D\/O)\b/g,' ').replace(/\([^)]*\)/g,' ').replace(/[,.;:/\\-]/g,' ').replace(/\b\d{3,}\b/g,' ').replace(/\b(\d+X|CG|TL|TEAM|PB|T2|B\d+)\b/g,' ').replace(/\s+/g,' ').trim()}
+function normFlight(v){let s=normText(v).toUpperCase().replace(/\s+/g,'');let m=s.match(/^([A-Z]{1,3})0*(\d+[A-Z]?)$/);return m?m[1]+m[2]:s}
+function gateTokens(v){let s=normText(v).toUpperCase().replace(/\s+/g,'');if(!s)return[];return [...new Set(s.split(/[\/,&+]|\bOR\b|\bAND\b/).map(x=>x.trim()).filter(Boolean))]}
+function gatesMatch(a,b){let A=gateTokens(a),B=gateTokens(b);if(!A.length||!B.length)return false;return A.some(x=>B.includes(x))}
+function excelDateToJS(v){if(v==null||v==='')return null;if(v instanceof Date&&!isNaN(v))return v;if(typeof v==='number'){let d=XLSX.SSF.parse_date_code(v);return d?new Date(d.y,d.m-1,d.d,d.H||0,d.M||0,Math.floor(d.S||0)):null}let s=normText(v);let m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?)?/i);if(m){let yy=+m[3];if(yy<100)yy+=2000;let hh=+(m[4]||0),mm=+(m[5]||0);let ap=(m[6]||'').toUpperCase();if(ap==='PM'&&hh<12)hh+=12;if(ap==='AM'&&hh===12)hh=0;return new Date(yy,+m[2]-1,+m[1],hh,mm)}m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s*([A-Za-z]{3,})(?:\s*(\d{2,4}))?/i);if(m){let mon='JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split(' ').indexOf(m[2].slice(0,3).toUpperCase());if(mon>=0){let y=m[3]?+m[3]:inferYear();if(y<100)y+=2000;return new Date(y,mon,+m[1])}}return null}
+function dateKey(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''}
+function parseSheetNameDate(name){
+  let s=normText(name).toUpperCase();
+  let m=s.match(/(\d{4})[\-\/. ](\d{1,2})[\-\/. ](\d{1,2})/);
+  if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+  m=s.match(/(\d{1,2})[\-\/. ](\d{1,2})[\-\/. ](\d{2,4})/);
+  if(m){let y=+m[3]; if(y<100)y+=2000; return new Date(y,+m[2]-1,+m[1]);}
+  m=s.match(/(\d{1,2})\s*([A-Z]{3,})(?:\s*(\d{2,4}))?/);
+  if(m){let mon='JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split(' ').indexOf(m[2].slice(0,3)); if(mon>=0){let y=m[3]?+m[3]:new Date().getFullYear(); if(y<100)y+=2000; return new Date(y,mon,+m[1]);}}
+  return null;
+}
+function rebuildDatePicker(){
+  const picker=el('datePicker'), sel=el('sheetSelect'), hint=el('selectedSheetHint');
+  pbsuSheetDates=(pbsuWb?.SheetNames||[]).map(name=>({name,date:parseSheetNameDate(name)})).filter(x=>x.date&&!isNaN(x.date));
+  pbsuSheetDates.sort((a,b)=>b.date-a.date);
+  sel.innerHTML=(pbsuWb?.SheetNames||[]).map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(!pbsuSheetDates.length){picker.disabled=true;hint.textContent='No date-like PBSU sheet tabs detected. Please rename tabs like 01-05-2026 or 01 May 2026.';return;}
+  picker.disabled=false;
+  picker.min=dateKey(pbsuSheetDates[pbsuSheetDates.length-1].date);
+  picker.max=dateKey(pbsuSheetDates[0].date);
+  picker.value=dateKey(pbsuSheetDates[0].date);
+  applyDatePickerSelection();
+}
+function applyDatePickerSelection(){
+  const picker=el('datePicker'), sel=el('sheetSelect'), hint=el('selectedSheetHint');
+  const chosen=picker.value?new Date(picker.value+'T00:00:00'):null;
+  if(!chosen||isNaN(chosen)){sel.value='';hint.textContent='Please select a PBSU date.';return;}
+  let picked=pbsuSheetDates.find(x=>dateKey(x.date)===dateKey(chosen));
+  if(!picked){
+    picked=[...pbsuSheetDates].sort((a,b)=>Math.abs(dayDiff(a.date,chosen))-Math.abs(dayDiff(b.date,chosen)))[0];
+    hint.innerHTML=`No exact tab for ${esc(dateKey(chosen))}. Using nearest tab: <b>${esc(picked.name)}</b> (${dateKey(picked.date)}).`;
+  }else{
+    hint.innerHTML=`Using PBSU tab: <b>${esc(picked.name)}</b>`;
+  }
+  sel.value=picked.name;
+}
+
+function dayDiff(a,b){if(!a||!b)return 999;let A=new Date(a.getFullYear(),a.getMonth(),a.getDate()),B=new Date(b.getFullYear(),b.getMonth(),b.getDate());return Math.round((A-B)/86400000)}
+function inferYear(){let years=casRows.map(r=>r.flightDate?.getFullYear()).filter(Boolean);return years.length?years.sort((a,b)=>years.filter(v=>v===b).length-years.filter(v=>v===a).length)[0]:new Date().getFullYear()}
+function readFile(file){return new Promise((res,rej)=>{let fr=new FileReader();fr.onload=e=>{try{res(XLSX.read(e.target.result,{type:'array',cellDates:true,cellStyles:false,dense:false}))}catch(err){rej(err)}};fr.onerror=rej;fr.readAsArrayBuffer(file)})}
+function sheetToRows(wb,name){return XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:'',raw:false})}
+function findHeader(rows,need){for(let i=0;i<Math.min(rows.length,15);i++){let row=rows[i].map(x=>normText(x).toUpperCase());let ok=need.every(n=>row.some(c=>c.includes(n)));if(ok)return i}return -1}
+function parsePbsuSheet(name){let rows=sheetToRows(pbsuWb,name);let hi=findHeader(rows,['FLIGHT','GATE','TL']);if(hi<0)throw new Error('Cannot find PBSU header row with FLIGHT, GATE, TL.');let h=rows[hi].map(x=>normText(x).toUpperCase());let idx={std:h.findIndex(x=>x==='STD'||x.includes('STD')),flight:h.findIndex(x=>x.includes('FLIGHT')),gate:h.findIndex(x=>x.includes('GATE')),tl:h.findIndex(x=>x==='TL'||x.includes('TEAM')||x.includes('TL')),efof:h.findIndex(x=>x.includes('EFOF'))};let tabDate=excelDateToJS(rows[1]?.[2])||excelDateToJS(name);let y=inferYear();if(tabDate&&!rows[1]?.[2]?.toString().match(/\d{4}/))tabDate.setFullYear(y);let out=[];for(let r=hi+1;r<rows.length;r++){let row=rows[r];let flight=normText(row[idx.flight]);let gate=normText(row[idx.gate]);let tl=normText(row[idx.tl]);if(!flight&&!gate&&!tl)continue;if(!flight||!gate)continue;out.push({rowNo:r+1,date:tabDate,std:normText(row[idx.std]),flight,gate,tl,efof:idx.efof>=0?normText(row[idx.efof]):'',flightNorm:normFlight(flight),tlNorm:normName(tl)})}return out}
+function getCell(row,idx){return normText(row[idx]??'')}
+function extractPeopleNames(v){let s=normText(v);if(!s)return[];try{let arr=JSON.parse(s);if(Array.isArray(arr))return arr.map(o=>o?.Name||'').filter(Boolean)}catch(e){}let found=[...s.matchAll(/"Name"\s*:\s*"([^"]+)"/g)].map(m=>m[1]);if(found.length)return found;return [s.replace(/^\d+\s*,\s*/,'').replace(/,\s*\d+$/,'')].filter(Boolean)}
+function parseCas(){let sh=casWb.SheetNames[0];let rows=sheetToRows(casWb,sh);let hi=findHeader(rows,['SUBMITTED BY','FLIGHT DATE','FLIGHT NUMBER']);if(hi<0)hi=2;let data=[];for(let r=hi+1;r<rows.length;r++){let row=rows[r];let submittedBy=getCell(row,2), submittedOn=excelDateToJS(row[7]), status=getCell(row,8), staff=getCell(row,9), flightDate=excelDateToJS(row[10]), flight=getCell(row,11), gate=getCell(row,14);if(!flight&&!gate&&!submittedBy)continue;let submittedByName=submittedBy.replace(/,\s*\d+$/,'');let staffNames=extractPeopleNames(staff);data.push({sourceRow:r+1,ref:getCell(row,0),submittedBy,submittedByName,submittedByNorm:normName(submittedByName),submittedOn,status,staffNames,staffNorms:staffNames.map(normName),flightDate,flight,flightNorm:normFlight(flight),gate})}casRows=data;let dedup=new Map();for(let x of casRows){let key=[x.flightNorm,dateKey(x.flightDate),gateTokens(x.gate).join('|'),x.submittedByNorm].join('~');let old=dedup.get(key);if(!old||(x.submittedOn&&old.submittedOn&&x.submittedOn>old.submittedOn)||(!old.submittedOn&&x.submittedOn))dedup.set(key,x)}casRows=[...dedup.values()]}
+function nameMatches(tlNorm,cas){if(!tlNorm)return false;let names=[cas.submittedByNorm,...cas.staffNorms].filter(Boolean);return names.some(n=>n.includes(tlNorm)||tlNorm.includes(n)||tlNorm.split(' ')[0]&&n.includes(tlNorm.split(' ')[0]))}
+function scoreMatch(p,cas){let flightOk=p.flightNorm===cas.flightNorm;let gateOk=gatesMatch(p.gate,cas.gate);let dd=Math.abs(dayDiff(p.date,cas.flightDate));let dateOk=dd===0, dateNear=dd===1;let tlOk=nameMatches(p.tlNorm,cas);let exact=flightOk&&gateOk&&(dateOk||dateNear)&&tlOk;let possible=flightOk&&gateOk&&(dateOk||dateNear);return {flightOk,gateOk,dateOk,dateNear,tlOk,exact,possible,dd}}
+function runCheck(){try{showMsg('');if(!pbsuWb||!casWb)throw new Error('Please upload both PBSU and CAS REQ Excel files first.');applyDatePickerSelection();let sheet=el('sheetSelect').value;if(!sheet)throw new Error('Please select one PBSU date.');let pbsu=parsePbsuSheet(sheet);parseCas();let results=[];for(let p of pbsu){let matches=casRows.map(c=>({cas:c,s:scoreMatch(p,c)})).filter(x=>x.s.possible);let exact=matches.filter(x=>x.s.exact);let chosen=exact.length?exact:matches;let status='not', reason='No CAS submission found by Flight + Gate + Date ±1 day.';if(exact.length){status='submitted';reason='Flight + gate + date matched, and TL matched Submitted By or Staff Employee ID.'}else if(matches.length){status='possible';reason='Flight + gate + date matched, but TL name not found in Submitted By or Staff Employee ID.'}results.push({...p,status,reason,matches:chosen.sort((a,b)=>(b.cas.submittedOn?.getTime()||0)-(a.cas.submittedOn?.getTime()||0))})}resultRows=results;showSubmitted=true;el('toggleSubmittedBtn').textContent='Hide submitted rows';render()}catch(err){showMsg(err.message||String(err),'err')}}
+function render(){let q=normText(el('searchBox').value).toUpperCase();let filter=el('statusFilter').value;let rows=resultRows.filter(r=>{if(!showSubmitted&&r.status==='submitted')return false;if(filter!=='all'&&r.status!==filter)return false;let hay=[r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.reason,...r.matches.map(m=>`${m.cas.submittedBy} ${m.cas.flight} ${m.cas.gate} ${dateKey(m.cas.flightDate)}`)].join(' ').toUpperCase();return !q||hay.includes(q)});let tbody=el('resultTable').querySelector('tbody');tbody.innerHTML=rows.map((r,i)=>`<tr class="status-${r.status==='not'?'not':r.status}"><td>${i+1}</td><td>${badge(r.status)}</td><td>${dateKey(r.date)}</td><td>${esc(r.std)}</td><td><b>${esc(r.flight)}</b></td><td>${esc(r.gate)}</td><td>${esc(r.tl)}</td><td>${renderMatches(r)}</td><td>${esc(r.reason)}</td></tr>`).join('');let total=resultRows.length, sub=resultRows.filter(x=>x.status==='submitted').length, poss=resultRows.filter(x=>x.status==='possible').length, not=resultRows.filter(x=>x.status==='not').length;el('stats').classList.remove('hidden');el('stats').innerHTML=`<div class="stat">Total PBSU flights<b>${total}</b></div><div class="stat ok">Submitted<b>${sub}</b></div><div class="stat warn">Possible match<b>${poss}</b></div><div class="stat bad">Need chase<b>${not}</b></div>`;el('resultArea').classList.remove('hidden')}
+function badge(s){return s==='submitted'?'<span class="pill ok">✅ Submitted</span>':s==='possible'?'<span class="pill warn">⚠️ Possible</span>':'<span class="pill bad">❌ Not submitted</span>'}
+function esc(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function renderMatches(r){if(!r.matches.length)return '<span class="small">No matched CAS row</span>';return r.matches.map(x=>`<div class="matchbox"><b>${esc(x.cas.submittedBy)}</b><div class="small">CAS row ${x.cas.sourceRow} · ${esc(x.cas.ref)} · Submitted ${dateKey(x.cas.submittedOn)} ${x.cas.submittedOn?String(x.cas.submittedOn).slice(16,21):''}</div><div class="small">Flight ${esc(x.cas.flight)} · Gate ${esc(x.cas.gate)} · Flight date ${dateKey(x.cas.flightDate)}</div><div class="small">Staff J: ${esc(x.cas.staffNames.join(', '))}</div></div>`).join('')}
+function chaseText(){return resultRows.filter(r=>r.status!=='submitted').map(r=>`${r.status==='possible'?'POSSIBLE':'NOT SUBMITTED'} | ${dateKey(r.date)} | ${r.std} | ${r.flight} | ${r.gate} | ${r.tl}`).join('\n')}
+function exportCsv(){let head=['Status','PBSU Date','STD','Flight','Gate','TL','Reason','CAS Submitted By','CAS Submitted On','CAS Flight Date','CAS Flight','CAS Gate','CAS Staff J'];let lines=[head];for(let r of resultRows){if(!showSubmitted&&r.status==='submitted')continue;if(!r.matches.length)lines.push([r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.reason,'','','','','','']);else for(let m of r.matches)lines.push([r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.reason,m.cas.submittedBy,dateKey(m.cas.submittedOn),dateKey(m.cas.flightDate),m.cas.flight,m.cas.gate,m.cas.staffNames.join('; ')]);}let csv=lines.map(a=>a.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');let blob=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='T2_EFOF_Check_Result.csv';a.click();URL.revokeObjectURL(url)}
+el('pbsuFile').addEventListener('change',async e=>{try{if(!e.target.files||!e.target.files[0])return;pbsuWb=await readFile(e.target.files[0]);rebuildDatePicker();el('pbsuInfo').innerHTML=`<div class="success">Loaded ${pbsuWb.SheetNames.length} PBSU date tabs. Calendar picker auto-selected latest available date.</div>`}catch(err){el('pbsuInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
+el('casFile').addEventListener('change',async e=>{try{if(!e.target.files||!e.target.files[0])return;casWb=await readFile(e.target.files[0]);parseCas();el('casInfo').innerHTML=`<div class="success">Loaded ${casRows.length} CAS submissions after duplicate same-submitter cleanup.</div>`}catch(err){el('casInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
+el('datePicker').addEventListener('change',applyDatePickerSelection);el('runBtn').addEventListener('click',runCheck);el('searchBox').addEventListener('input',render);el('statusFilter').addEventListener('change',render);el('toggleSubmittedBtn').addEventListener('click',()=>{showSubmitted=!showSubmitted;el('toggleSubmittedBtn').textContent=showSubmitted?'Hide submitted rows':'Show submitted rows';render()});el('copyBtn').addEventListener('click',async()=>{let t=chaseText();if(!t)return showMsg('No TL to chase.');await navigator.clipboard.writeText(t);showMsg('Chase list copied. Paste into WhatsApp/Teams/email.')});el('exportCsvBtn').addEventListener('click',exportCsv);
+</script>
+</body>
+</html>
