@@ -26,7 +26,7 @@ input[type=file],select,input[type=text],input[type=date]{width:100%;padding:10p
 button{border:0;border-radius:7px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--blue);color:#fff;height:38px;white-space:nowrap}
 button.secondary{background:#eef2ff;color:#1f3ca6}button.gray{background:#edf0f5;color:#394359}
 .controls{display:grid;grid-template-columns:180px 1fr 150px auto auto;gap:8px;align-items:end}.controlGroup{display:flex;flex-direction:column;justify-content:flex-end;min-width:0}.controlGroup label{height:14px;margin-bottom:6px;line-height:14px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px}.stat b{display:block;font-size:22px;margin-top:5px}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}th,td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}th{background:#f0f0ee;text-align:left;font-size:12px;text-transform:uppercase;color:#555;position:sticky;top:0;z-index:2}tr:last-child td{border-bottom:0}tr.status-submitted{background:var(--softOk)}tr.status-not{background:var(--softBad)}tr.status-possible{background:var(--softWarn)}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px;margin:2px 4px 2px 0}.pill.ok{background:#dff5e6;color:#0e6f31}.pill.bad{background:#ffe0e0;color:#a11919}.pill.warn{background:#ffedcb;color:#8a5300}.small{font-size:12px;color:#657189;line-height:1.45}.matchbox{border-left:3px solid #ccd6ea;padding-left:8px;margin:4px 0}.hidden{display:none!important}.err{padding:10px;background:#fff1f1;border:1px solid #ffcaca;border-radius:7px;color:#991b1b;margin-top:10px;white-space:pre-wrap}.success{padding:10px;background:#eefaf2;border:1px solid #bce7c7;border-radius:7px;color:#116b30;margin-top:10px}.sectionTitle{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}.footerNote{margin-top:14px;font-size:12px;color:#657189}.uploadIcon{text-align:center;font-size:28px;margin:8px 0 8px}.uploadTitle{text-align:center;font-weight:800}.uploadSub{text-align:center;color:#666;font-size:12px;margin-top:5px}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}th,td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}th{background:#f0f0ee;text-align:left;font-size:12px;text-transform:uppercase;color:#555;position:sticky;top:0;z-index:2}tr:last-child td{border-bottom:0}tr.status-submitted{background:var(--softOk)}tr.status-not{background:var(--softBad)}tr.status-possible{background:var(--softWarn)}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px;margin:2px 4px 2px 0}.pill.ok{background:#dff5e6;color:#0e6f31}.pill.bad{background:#ffe0e0;color:#a11919}.pill.warn{background:#ffedcb;color:#8a5300}.small{font-size:12px;color:#657189;line-height:1.45}.matchbox{border-left:3px solid #ccd6ea;padding-left:8px;margin:4px 0}.hidden{display:none!important}.err{padding:10px;background:#fff1f1;border:1px solid #ffcaca;border-radius:7px;color:#991b1b;margin-top:10px;white-space:pre-wrap}.success{padding:10px;background:#eefaf2;border:1px solid #bce7c7;border-radius:7px;color:#116b30;margin-top:10px}.sectionTitle{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}.footerNote{margin-top:14px;font-size:12px;color:#657189}.uploadBox{border:1px dashed #c9c1b7;border-radius:10px;padding:18px 14px;min-height:145px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#fff;cursor:pointer;transition:.15s}.uploadBox:hover{border-color:#2459f5;background:#f8faff}.uploadBox input[type=file]{display:none}.uploadIcon{text-align:center;font-size:28px;margin:0 0 8px}.uploadTitle{text-align:center;font-weight:800}.uploadSub{text-align:center;color:#666;font-size:12px;margin-top:5px}.uploadHint{font-size:12px;color:#596273;margin-top:6px;max-width:340px}.fileName{margin-top:10px;font-size:12px;font-weight:700;color:#2459f5;word-break:break-all}
 @media(max-width:980px){.grid,.controls,.stats{grid-template-columns:1fr}.wrap{padding:14px}.controlGroup label{height:auto}.sectionTitle{display:block}table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
 </style>
 </head>
@@ -42,18 +42,29 @@ table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;borde
     <div class="grid">
       <div>
         <label>1) PBSU T2 EFOF Data.xlsx</label>
-        <input id="pbsuFile" type="file" accept=".xlsx,.xls" />
-        <div class="uploadIcon">📁</div><div class="uploadTitle">PBSU Excel</div><div class="uploadSub">Contains date tabs</div>
-        <div class="hint">Website will read all date tabs and let you select one tab only.</div><div id="pbsuInfo"></div>
+        <label class="uploadBox" for="pbsuFile">
+          <input id="pbsuFile" type="file" accept=".xlsx,.xls" />
+          <div class="uploadIcon">📁</div>
+          <div class="uploadTitle">PBSU Excel</div>
+          <div class="uploadSub">Contains date tabs</div>
+          <div class="uploadHint">Website will read all date tabs and let you select one tab only.</div>
+          <div id="pbsuFileName" class="fileName">Click to choose file</div>
+        </label>
+        <div id="pbsuInfo"></div>
       </div>
       <div>
         <label>2) CAS REQ - EFOF PREBOARD T2 export.xlsx</label>
-        <input id="casFile" type="file" accept=".xlsx,.xls" />
-        <div class="uploadIcon">📄</div><div class="uploadTitle">CAS REQ Export</div><div class="uploadSub">Submitted EFOF records</div>
-        <div class="hint">Uses CAS columns C Submitted By, H Submitted On, J Staff Employee ID, K Flight Date, L Flight, O Gate.</div><div id="casInfo"></div>
+        <label class="uploadBox" for="casFile">
+          <input id="casFile" type="file" accept=".xlsx,.xls" />
+          <div class="uploadIcon">📄</div>
+          <div class="uploadTitle">CAS REQ Export</div>
+          <div class="uploadSub">Submitted EFOF records</div>
+          <div class="uploadHint">Uses CAS columns C Submitted By, H Submitted On, J Staff Employee ID, K Flight Date, L Flight, O Gate.</div>
+          <div id="casFileName" class="fileName">Click to choose file</div>
+        </label>
+        <div id="casInfo"></div>
       </div>
-    </div>
-  </div>
+    </div>  </div>
 
   <div class="card">
     <div class="controls">
@@ -102,8 +113,8 @@ function esc(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt
 function renderMatches(r){if(!r.matches.length)return '<span class="small">No matched CAS row</span>';return r.matches.map(x=>`<div class="matchbox"><b>${esc(x.cas.submittedBy)}</b><div class="small">CAS row ${x.cas.sourceRow} · ${esc(x.cas.ref)} · Submitted ${dateKey(x.cas.submittedOn)} ${x.cas.submittedOn?String(x.cas.submittedOn).slice(16,21):''}</div><div class="small">Flight ${esc(x.cas.flight)} · Gate ${esc(x.cas.gate)} · Flight date ${dateKey(x.cas.flightDate)}</div><div class="small">Staff J: ${esc(x.cas.staffNames.join(', '))}</div></div>`).join('')}
 function chaseText(){return resultRows.filter(r=>r.status!=='submitted').map(r=>`${r.status==='possible'?'POSSIBLE':'NOT SUBMITTED'} | ${dateKey(r.date)} | ${r.std} | ${r.flight} | ${r.gate} | ${r.tl}`).join('\n')}
 function exportCsv(){let head=['Status','PBSU Date','STD','Flight','Gate','TL','Reason','CAS Submitted By','CAS Submitted On','CAS Flight Date','CAS Flight','CAS Gate','CAS Staff J'];let lines=[head];for(let r of resultRows){if(!showSubmitted&&r.status==='submitted')continue;if(!r.matches.length)lines.push([r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.reason,'','','','','','']);else for(let m of r.matches)lines.push([r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.reason,m.cas.submittedBy,dateKey(m.cas.submittedOn),dateKey(m.cas.flightDate),m.cas.flight,m.cas.gate,m.cas.staffNames.join('; ')])}let csv=lines.map(a=>a.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');let blob=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='T2_EFOF_Check_Result.csv';a.click();URL.revokeObjectURL(url)}
-el('pbsuFile').addEventListener('change',async e=>{try{pbsuWb=await readFile(e.target.files[0]);rebuildDatePicker();el('pbsuInfo').innerHTML=`<div class="success">Loaded ${pbsuWb.SheetNames.length} PBSU date tabs. Calendar picker auto-selected latest available date.</div>`}catch(err){el('pbsuInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
-el('casFile').addEventListener('change',async e=>{try{casWb=await readFile(e.target.files[0]);parseCas();el('casInfo').innerHTML=`<div class="success">Loaded ${casRows.length} CAS submissions after duplicate same-submitter cleanup.</div>`}catch(err){el('casInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
+el('pbsuFile').addEventListener('change',async e=>{try{const file=e.target.files&&e.target.files[0];if(!file)return;el('pbsuFileName').textContent=file.name;pbsuWb=await readFile(file);rebuildDatePicker();el('pbsuInfo').innerHTML=`<div class="success">Loaded ${pbsuWb.SheetNames.length} PBSU date tabs. Calendar picker auto-selected latest available date.</div>`}catch(err){el('pbsuInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
+el('casFile').addEventListener('change',async e=>{try{const file=e.target.files&&e.target.files[0];if(!file)return;el('casFileName').textContent=file.name;casWb=await readFile(file);parseCas();el('casInfo').innerHTML=`<div class="success">Loaded ${casRows.length} CAS submissions after duplicate same-submitter cleanup.</div>`}catch(err){el('casInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
 el('datePicker').addEventListener('change',applyDatePickerSelection);el('runBtn').addEventListener('click',runCheck);el('searchBox').addEventListener('input',render);el('statusFilter').addEventListener('change',render);el('toggleSubmittedBtn').addEventListener('click',()=>{showSubmitted=!showSubmitted;el('toggleSubmittedBtn').textContent=showSubmitted?'Hide submitted rows':'Show submitted rows';render()});el('copyBtn').addEventListener('click',async()=>{let t=chaseText();if(!t)return showMsg('No TL to chase.');await navigator.clipboard.writeText(t);showMsg('Chase list copied. Paste into WhatsApp/Teams/email.')});el('exportCsvBtn').addEventListener('click',exportCsv);
 </script>
 </body>
