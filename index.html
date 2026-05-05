@@ -1,206 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>T2 EFOF Submission Checker</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<style>
-:root{
-  --bg:#f7f5f0;--card:#fff;--line:#ddd7ce;--text:#1d1d1f;--muted:#666;
-  --ok:#138a3d;--bad:#c62828;--warn:#b36b00;--blue:#2459f5;
-  --softBad:#fff1f1;--softOk:#effaf2;--softWarn:#fff7e8
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
-.wrap{max-width:1100px;margin:0 auto;padding:18px 22px 30px}
-h1{margin:0 0 6px;font-size:22px;font-weight:800}
-p{margin:0;color:var(--muted);line-height:1.45}
-.tabs{display:flex;gap:8px;margin:18px 0 14px}.tab{border:1px solid #cfc8bd;background:#fff;border-radius:7px;padding:10px 14px;font-weight:700}.tab.active{background:#111;color:#fff;border-color:#111}
-.stepbar{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:16px;color:#999}.stepbar b{color:#111}.dot{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid #bbb;margin-right:7px;font-size:12px}.dot.active{background:#111;color:#fff;border-color:#111}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:none;margin-bottom:14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-label{display:block;font-weight:700;margin-bottom:8px;font-size:12px}
-.hint{font-size:12px;color:#596273;margin-top:7px}
-input[type=file],select,input[type=text],input[type=date]{width:100%;padding:10px;border:1px solid #d7d2ca;border-radius:6px;background:#fff;font-size:13px;height:38px}
-button{border:0;border-radius:7px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--blue);color:#fff;height:38px;white-space:nowrap}
-button.secondary{background:#eef2ff;color:#1f3ca6}button.gray{background:#edf0f5;color:#394359}
-.controls{display:grid;grid-template-columns:180px 1fr 150px auto auto;gap:8px;align-items:end}.controlGroup{display:flex;flex-direction:column;justify-content:flex-end;min-width:0}.controlGroup label{height:14px;margin-bottom:6px;line-height:14px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px}.stat b{display:block;font-size:22px;margin-top:5px}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}th,td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}th{background:#f0f0ee;text-align:left;font-size:12px;text-transform:uppercase;color:#555;position:sticky;top:0;z-index:2}tr:last-child td{border-bottom:0}tr.status-submitted{background:var(--softOk)}tr.status-not{background:var(--softBad)}tr.status-possible{background:var(--softWarn)}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px;margin:2px 4px 2px 0}.pill.ok{background:#dff5e6;color:#0e6f31}.pill.bad{background:#ffe0e0;color:#a11919}.pill.warn{background:#ffedcb;color:#8a5300}.small{font-size:12px;color:#657189;line-height:1.45}.matchbox{border-left:3px solid #ccd6ea;padding-left:8px;margin:4px 0}.hidden{display:none!important}.err{padding:10px;background:#fff1f1;border:1px solid #ffcaca;border-radius:7px;color:#991b1b;margin-top:10px;white-space:pre-wrap}.success{padding:10px;background:#eefaf2;border:1px solid #bce7c7;border-radius:7px;color:#116b30;margin-top:10px}.sectionTitle{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}.footerNote{margin-top:14px;font-size:12px;color:#657189}.uploadBox{border:1px dashed #c9c1b7;border-radius:10px;padding:18px 14px;min-height:145px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#fff;cursor:pointer;transition:.15s}.uploadBox:hover{border-color:#2459f5;background:#f8faff}.uploadBox input[type=file]{display:none}.uploadIcon{text-align:center;font-size:28px;margin:0 0 8px}.uploadTitle{text-align:center;font-weight:800}.uploadSub{text-align:center;color:#666;font-size:12px;margin-top:5px}.uploadHint{font-size:12px;color:#596273;margin-top:6px;max-width:340px}.fileName{margin-top:10px;font-size:12px;font-weight:700;color:#2459f5;word-break:break-all}
-@media(max-width:980px){.grid,.controls,.stats{grid-template-columns:1fr}.wrap{padding:14px}.controlGroup label{height:auto}.sectionTitle{display:block}table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
-</style>
+    <meta charset="UTF-8"/>
+    <title>T2 EFOF Submission Checker v23</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root { --bg: #f5f5f7; --card: #fff; --line: #e1e1e1; --text: #1d1d1f; --ok: #28a745; --bad: #d93025; --blue: #0066cc; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #333; margin: 20px; font-size: 13px; }
+        .container { max-width: 1550px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .uploadBox { border: 2px dashed #bbb; padding: 25px; text-align: center; cursor: pointer; border-radius: 10px; background: #fff; display: block; transition: 0.2s; }
+        .uploadBox:hover { border-color: var(--blue); background: #f0f7ff; }
+        input[type=file] { display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid var(--line); position: sticky; top: 0; z-index: 10; font-size: 11px; text-transform: uppercase; color: #666; }
+        td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; word-wrap: break-word; }
+        .pill { padding: 4px 10px; border-radius: 20px; font-weight: bold; color: white; font-size: 10px; }
+        .bg-ok { background: var(--ok); }
+        .bg-bad { background: var(--bad); }
+        .remark-updated { color: var(--ok); font-weight: bold; }
+        .remark-pending { color: #888; font-style: italic; }
+        .ok-text { color: var(--ok); font-weight: bold; }
+        .fail-text { color: var(--bad); font-weight: bold; }
+        .diag-row { background: #fdfdfd; border: 1px solid #eee; padding: 8px; border-radius: 6px; margin-bottom: 6px; font-family: 'Courier New', monospace; font-size: 11px; }
+        .match-card { background: #f0fdf4; border-left: 5px solid var(--ok); padding: 12px; border-radius: 4px; }
+        .btn-action { padding: 11px 20px; border-radius: 7px; cursor: pointer; font-weight: bold; border: none; margin-left: 10px; transition: 0.2s; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-copy { background: #28a745; color: white; }
+        .btn-toggle { background: #6c757d; color: white; }
+        .btn-toggle.active { background: #111; }
+        .chk-col { width: 30px; text-align: center; }
+        #datePicker { padding: 9px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-family: inherit; }
+    </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>PBSU T2 EFOF Submission Checker</h1>
-  <p>Upload PBSU T2 EFOF Data + CAS REQ EFOF export, select one PBSU date tab, then check which TL/officer already submitted EFOF.</p>
-  <div class="tabs"><button class="tab active">EFOF Checker</button></div>
-  <div class="stepbar"><span class="dot active">1</span><b>Upload</b> <span class="dot">2</span> Select date <span class="dot">3</span> Check result <span class="dot">4</span> Chase TL</div>
 
-  <div class="card">
-    <h3 style="margin:0 0 14px;font-size:16px">Step 1 - Upload files & setup</h3>
+<div class="container">
+    <h2>T2 EFOF Submission Checker (v23)</h2>
+    <p style="color:#666">Fixed logic: Tabs without a year are treated as <b>2025</b>[cite: 1].</p>
+    
     <div class="grid">
-      <div>
-        <label>1) PBSU T2 EFOF Data.xlsx</label>
-        <label class="uploadBox" for="pbsuFile">
-          <input id="pbsuFile" type="file" accept=".xlsx,.xls" />
-          <div class="uploadIcon">📁</div>
-          <div class="uploadTitle">PBSU Excel</div>
-          <div class="uploadSub">Contains date tabs</div>
-          <div class="uploadHint">Website will read all date tabs and let you select one tab only.</div>
-          <div id="pbsuFileName" class="fileName">Click to choose file</div>
-        </label>
-        <div id="pbsuInfo"></div>
-      </div>
-      <div>
-        <label>2) CAS REQ - EFOF PREBOARD T2 export.xlsx</label>
-        <label class="uploadBox" for="casFile">
-          <input id="casFile" type="file" accept=".xlsx,.xls" />
-          <div class="uploadIcon">📄</div>
-          <div class="uploadTitle">CAS REQ Export</div>
-          <div class="uploadSub">Submitted EFOF records</div>
-          <div class="uploadHint">Uses CAS columns C Submitted By, H Submitted On, J Staff Employee ID, K Flight Date, L Flight, O Gate.</div>
-          <div id="casFileName" class="fileName">Click to choose file</div>
-        </label>
-        <div id="casInfo"></div>
-      </div>
-    </div>  </div>
-
-  <div class="card">
-    <div class="controls">
-      <div class="controlGroup"><label>Select PBSU date</label><input id="datePicker" type="date" disabled /><select id="sheetSelect" class="hidden"><option value="">Upload PBSU file first</option></select></div>
-      <div class="controlGroup"><label>Search / filter</label><input id="searchBox" type="text" placeholder="Flight, gate, TL, submitter..." /></div>
-      <div class="controlGroup"><label>Result filter</label><select id="statusFilter"><option value="all">All results</option><option value="not">Only not submitted</option><option value="possible">Only possible match</option><option value="submitted">Only submitted</option></select></div>
-      <button id="runBtn">Check EFOF</button><button id="copyBtn" class="secondary">Copy chase list</button>
+        <label class="uploadBox"><input type="file" id="pbsuFile"><div id="pbsuLabel">📁 1. PBSU Schedule</div></label>
+        <label class="uploadBox"><input type="file" id="casFile"><div id="casLabel">📄 2. CAS Export</div></label>
     </div>
-    <div id="selectedSheetHint" class="hint">Upload PBSU file first</div>
-    <div class="toolbar"><button id="toggleSubmittedBtn" class="gray">Hide submitted rows</button><button id="exportCsvBtn" class="gray">Export result CSV</button></div>
-    <div id="msg"></div>
-  </div>
-  <div id="stats" class="stats hidden"></div>
-  <div id="resultArea" class="hidden"><div class="sectionTitle"><h2 style="margin:0;font-size:20px">Result</h2><div class="small">Submitted rows are shown by default. Click “Hide submitted rows” to focus on TL to chase.</div></div><table id="resultTable"><thead><tr><th>#</th><th>Status</th><th>PBSU Date</th><th>STD</th><th>Flight</th><th>Gate</th><th>TL / Team</th><th>Matched CAS submission</th><th>Issue / Reason</th></tr></thead><tbody></tbody></table></div>
-  <div class="footerNote">Matching logic: If PBSU Column F checkbox is TRUE, the row is treated as ✅ Submitted. Otherwise, matching uses Flight + Gate + Date. Date allows ±1 day. TL match counts if PBSU TL name matches CAS Submitted By column C or Staff Employee ID column J. If same submitter submitted duplicate entries, latest Submitted On is used.</div>
+    
+    <div id="ui" style="display:none; text-align:center; padding: 20px; background: #f9f9f9; border-radius: 10px; margin-bottom: 20px;">
+        <label style="font-weight:bold; margin-right: 10px;">Select Flight Date:</label>
+        <input type="date" id="datePicker">
+        
+        <button onclick="runCheck()" class="btn-action btn-blue">Check Status</button>
+        <button id="toggleHideUpdated" class="btn-action btn-toggle" onclick="toggleUpdatedFilter()">Hide Updated Remarks</button>
+        <button onclick="copyTicked()" class="btn-action btn-copy">📋 Copy Ticked Data</button>
+    </div>
+    
+    <div id="statsBar" style="display:none; margin: 15px 0; font-weight: bold; color: var(--blue);"></div>
+
+    <table id="resTable" style="display:none;">
+        <thead>
+            <tr>
+                <th class="chk-col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                <th style="width: 40px;">#</th>
+                <th style="width: 100px;">Submission</th>
+                <th style="width: 90px;">Remark (F)</th>
+                <th style="width: 100px;">Flight Date</th>
+                <th style="width: 70px;">STD</th>
+                <th style="width: 80px;">Flight</th>
+                <th style="width: 80px;">Gate</th>
+                <th style="width: 180px;">Team Leader (TL)</th>
+                <th>Diagnostic Result</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+    </table>
 </div>
+
 <script>
-let pbsuWb=null, casWb=null, casRows=[], resultRows=[], showSubmitted=true, pbsuSheetDates=[];
-const el=id=>document.getElementById(id);
-function showMsg(txt,type='success'){el('msg').innerHTML=txt?`<div class="${type}">${txt}</div>`:''}
-function normText(v){return String(v??'').replace(/\s+/g,' ').trim()}
-function normName(v){return normText(v).toUpperCase()
-  .replace(/\*/g,' ')
-  .replace(/\b(A\/L|A\/P|BIN|BTE|S\/O|D\/O|BT|BINTE|BINTI)\b/g,' ')
-  .replace(/\([^)]*\)/g,' ')
-  .replace(/[,.;:/\\\-]/g,' ')
-  .replace(/\b\d+[A-Z]+\d*\b/g,' ')
-  .replace(/\b\d{1,}\b/g,' ')
-  .replace(/\b(\d+X|CG|TL|TEAM|PB|T2|B\d+|PM|NHB|AHD|ROV|FO|XRAY|CLEAR|QUEUE|VIP|LVL|LEVEL)\b/g,' ')
-  .replace(/\s+/g,' ').trim()}
-function normFlight(v){let s=normText(v).toUpperCase().replace(/\s+/g,'');let m=s.match(/^([A-Z]{1,3})0*(\d+[A-Z]?)$/);return m?m[1]+m[2]:s}
-function gateTokens(v){
-  let s=normText(v).toUpperCase();
-  s=s.replace(/LEVEL/g,'LVL').replace(/CIPC\s*/g,'').replace(/GATE\s*/g,'');
-  s=s.replace(/VIP\s*LVL\s*0?2|VIP\s*L\s*0?2|LVL\s*0?2/g,'VIPL2');
+    var pbsuWb = null, casData = [];
+    var hideUpdated = false;
+    var sheetDateMap = {};
 
-  // Important: PBSU sometimes has symbols like F53R*.
-  // Remove symbols first so F53R* can become F53R, then also expand to F53.
-  s=s.replace(/\*/g,'');
-  s=s.replace(/\bOR\b|\bAND\b/g,'/');
-  s=s.replace(/[^A-Z0-9\/,&+]/g,'');
-
-  if(!s)return[];
-  let raw=s.split(/[\/,&+]/).map(x=>x.trim()).filter(Boolean);
-  let out=[],prefix='';
-  raw.forEach(x=>{
-    if(/^[A-Z]\d+/.test(x)){prefix=x[0];out.push(x)}
-    else if(prefix&&/^\d+/.test(x)){out.push(prefix+x)}
-    else{out.push(x);let m=x.match(/^([A-Z])\d+/);if(m)prefix=m[1]}
-  });
-  let more=[];
-  out.forEach(x=>{
-    more.push(x);
-    let m=x.match(/^([A-Z]\d+)[LR]$/);
-    if(m)more.push(m[1]); // F53R/F53L/D42R/D42L can match F53/D42 in CAS
-  });
-  return [...new Set(more.filter(Boolean))]
-}
-function gatesMatch(a,b){let A=gateTokens(a),B=gateTokens(b);if(!A.length||!B.length)return false;return A.some(x=>B.includes(x))}
-function excelDateToJS(v){if(v==null||v==='')return null;if(v instanceof Date&&!isNaN(v))return v;if(typeof v==='number'){let d=XLSX.SSF.parse_date_code(v);return d?new Date(d.y,d.m-1,d.d,d.H||0,d.M||0,Math.floor(d.S||0)):null}let s=normText(v);let m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?)?/i);if(m){let yy=+m[3];if(yy<100)yy+=2000;let hh=+(m[4]||0),mm=+(m[5]||0);let ap=(m[6]||'').toUpperCase();if(ap==='PM'&&hh<12)hh+=12;if(ap==='AM'&&hh===12)hh=0;return new Date(yy,+m[2]-1,+m[1],hh,mm)}m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s*([A-Za-z]{3,})(?:\s*(\d{2,4}))?/i);if(m){let mon='JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split(' ').indexOf(m[2].slice(0,3).toUpperCase());if(mon>=0){let y=m[3]?+m[3]:inferYear();if(y<100)y+=2000;return new Date(y,mon,+m[1])}}return null}
-function dateKey(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''}
-function parseSheetNameDateInfo(name,defaultYear=null,latestExplicit=null){
-  let s=normText(name).toUpperCase().replace(/\s+/g,' ').trim();
-  let m=s.match(/(\d{4})[\-\/. ](\d{1,2})[\-\/. ](\d{1,2})/);
-  if(m)return{date:new Date(+m[1],+m[2]-1,+m[3]),hasYear:true};
-  m=s.match(/(\d{1,2})[\-\/. ](\d{1,2})[\-\/. ](\d{2,4})/);
-  if(m){let y=+m[3];if(y<100)y+=2000;return{date:new Date(y,+m[2]-1,+m[1]),hasYear:true}}
-  m=s.match(/(\d{1,2})(?:ST|ND|RD|TH)?\s*([A-Z]{3,})(?:\s*(\d{2,4}))?/);
-  if(m){
-    let mon='JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split(' ').indexOf(m[2].slice(0,3));
-    if(mon>=0){
-      let hasYear=!!m[3],y=hasYear?+m[3]:defaultYear;
-      if(y==null){
-        if(latestExplicit){y=latestExplicit.getFullYear(); if(mon>latestExplicit.getMonth())y-=1}
-        else y=new Date().getFullYear();
-      }
-      if(y<100)y+=2000;
-      return{date:new Date(y,mon,+m[1]),hasYear};
+    function clean(s) { return (s || "").toString().toUpperCase().replace(/[^A-Z0-9]/g, '').trim(); }
+    
+    function cleanTL(s) {
+        return (s || "").toString().toUpperCase()
+            .replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '')
+            .replace(/\b(PM|T2|AHD|CG|TEAM|ROV|PB|FO|XRAY|STAFF|OFFICER)\b/g, '')
+            .replace(/[^A-Z]/g, ' ').trim();
     }
-  }
-  return{date:null,hasYear:false};
-}
-function parseSheetNameDate(name,defaultYear=null,latestExplicit=null){return parseSheetNameDateInfo(name,defaultYear,latestExplicit).date}
-function rebuildDatePicker(){
-  const picker=el('datePicker'),sel=el('sheetSelect'),hint=el('selectedSheetHint');
-  const sheetNames=pbsuWb?.SheetNames||[];
-  const explicit=sheetNames.map(name=>({name,...parseSheetNameDateInfo(name)})).filter(x=>x.date&&!isNaN(x.date)&&x.hasYear);
-  explicit.sort((a,b)=>b.date-a.date);
-  const latestExplicit=explicit[0]?.date||null;
-  pbsuSheetDates=sheetNames.map(name=>{
-    const info=parseSheetNameDateInfo(name,null,latestExplicit);
-    return{name,date:info.date,hasYear:info.hasYear};
-  }).filter(x=>x.date&&!isNaN(x.date));
-  pbsuSheetDates.sort((a,b)=>b.date-a.date);
-  sel.innerHTML=sheetNames.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-  if(!pbsuSheetDates.length){picker.disabled=true;hint.textContent='No date-like PBSU sheet tabs detected. Please rename tabs like 01-05-2026 or 01 May 2026.';return}
-  picker.disabled=false;
-  picker.min=dateKey(pbsuSheetDates[pbsuSheetDates.length-1].date);
-  picker.max=dateKey(pbsuSheetDates[0].date);
-  picker.value=dateKey(pbsuSheetDates[0].date);
-  applyDatePickerSelection();
-}
-function applyDatePickerSelection(){const picker=el('datePicker'),sel=el('sheetSelect'),hint=el('selectedSheetHint');const chosen=picker.value?new Date(picker.value+'T00:00:00'):null;if(!chosen||isNaN(chosen)){sel.value='';hint.textContent='Please select a PBSU date.';return}let picked=pbsuSheetDates.find(x=>dateKey(x.date)===dateKey(chosen));if(!picked){picked=[...pbsuSheetDates].sort((a,b)=>Math.abs(dayDiff(a.date,chosen))-Math.abs(dayDiff(b.date,chosen)))[0];hint.innerHTML=`No exact tab for ${esc(dateKey(chosen))}. Using nearest tab: <b>${esc(picked.name)}</b> (${dateKey(picked.date)}).`}else{hint.innerHTML=`Using PBSU tab: <b>${esc(picked.name)}</b>`}sel.value=picked.name}
-function dayDiff(a,b){if(!a||!b)return 999;let A=new Date(a.getFullYear(),a.getMonth(),a.getDate()),B=new Date(b.getFullYear(),b.getMonth(),b.getDate());return Math.round((A-B)/86400000)}
-function inferYear(){let years=casRows.map(r=>r.flightDate?.getFullYear()).filter(Boolean);return years.length?years.sort((a,b)=>years.filter(v=>v===b).length-years.filter(v=>v===a).length)[0]:new Date().getFullYear()}
-function readFile(file){return new Promise((res,rej)=>{if(!file)return rej(new Error('No file selected.'));let fr=new FileReader();fr.onload=e=>{try{res(XLSX.read(e.target.result,{type:'array',cellDates:true,cellStyles:false,dense:false}))}catch(err){rej(err)}};fr.onerror=rej;fr.readAsArrayBuffer(file)})}
-function sheetToRows(wb,name){return XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:'',raw:false})}
-function findHeader(rows,need){for(let i=0;i<Math.min(rows.length,15);i++){let row=rows[i].map(x=>normText(x).toUpperCase());let ok=need.every(n=>row.some(c=>c.includes(n)));if(ok)return i}return -1}
-function parsePbsuSheet(name){let rows=sheetToRows(pbsuWb,name);let hi=findHeader(rows,['FLIGHT','GATE','TL']);if(hi<0)throw new Error('Cannot find PBSU header row with FLIGHT, GATE, TL.');let h=rows[hi].map(x=>normText(x).toUpperCase());let idx={std:h.findIndex(x=>x==='STD'||x.includes('STD')),flight:h.findIndex(x=>x.includes('FLIGHT')),gate:h.findIndex(x=>x.includes('GATE')),tl:h.findIndex(x=>x==='TL'||x.includes('TEAM')||x.includes('TL')),efof:h.findIndex(x=>x.includes('EFOF'))};
-  // PBSU Column F is the manual EFOF checked checkbox.
-  // Some PBSU tabs do NOT have an EFOF header in F4, so header search returns -1.
-  // In that case, force-read Excel column F (zero-based index 5).
-  const efofCol = idx.efof >= 0 ? idx.efof : 5;
-  let tabDate=parseSheetNameDate(name)||excelDateToJS(rows[1]?.[2]);let y=inferYear();if(tabDate&&!String(rows[1]?.[2]||name).match(/\d{4}/))tabDate.setFullYear(y);let out=[];for(let r=hi+1;r<rows.length;r++){let row=rows[r];let flight=normText(row[idx.flight]);let gate=normText(row[idx.gate]);let tl=normText(row[idx.tl]);if(!flight&&!gate&&!tl)continue;if(!flight||!gate)continue;out.push({rowNo:r+1,date:tabDate,std:normText(row[idx.std]),flight,gate,tl,efof:normText(row[efofCol]),flightNorm:normFlight(flight),tlNorm:normName(tl)})}return out}
-function getCell(row,idx){return normText(row[idx]??'')}
-function isPbsuChecked(v){let s=normText(v).toUpperCase();return s==='TRUE'||s==='YES'||s==='Y'||s==='1'||s==='CHECKED'||s==='DONE'||s==='SUBMITTED'||s==='✅'}
-function extractPeopleNames(v){let s=normText(v);if(!s)return[];try{let arr=JSON.parse(s);if(Array.isArray(arr))return arr.map(o=>o?.Name||'').filter(Boolean)}catch(e){}let found=[...s.matchAll(/"Name"\s*:\s*"([^"]+)"/g)].map(m=>m[1]);if(found.length)return found;return [s.replace(/^\d+\s*,\s*/,'').replace(/,\s*\d+$/,'')].filter(Boolean)}
-function parseCas(){let sh=casWb.SheetNames[0];let rows=sheetToRows(casWb,sh);let hi=findHeader(rows,['SUBMITTED BY','FLIGHT DATE','FLIGHT NUMBER']);if(hi<0)hi=2;let data=[];for(let r=hi+1;r<rows.length;r++){let row=rows[r];let submittedBy=getCell(row,2),submittedOn=excelDateToJS(row[7]),status=getCell(row,8),staff=getCell(row,9),flightDate=excelDateToJS(row[10]),flight=getCell(row,11),gate=getCell(row,14);if(!flight&&!gate&&!submittedBy)continue;let submittedByName=submittedBy.replace(/,\s*\d+$/,'');let staffNames=extractPeopleNames(staff);data.push({sourceRow:r+1,ref:getCell(row,0),submittedBy,submittedByName,submittedByNorm:normName(submittedByName),submittedOn,status,staffNames,staffNorms:staffNames.map(normName),flightDate,flight,flightNorm:normFlight(flight),gate})}casRows=data;let dedup=new Map();for(let x of casRows){let key=[x.flightNorm,dateKey(x.flightDate),gateTokens(x.gate).join('|'),x.submittedByNorm].join('~');let old=dedup.get(key);if(!old||(x.submittedOn&&old.submittedOn&&x.submittedOn>old.submittedOn)||(!old.submittedOn&&x.submittedOn))dedup.set(key,x)}casRows=[...dedup.values()]}
-function nameMatches(tlNorm,cas){
-  if(!tlNorm)return false;
-  let stop=new Set(['PM','NHB','CG','FO','ROV','AHD','CLEAR','QUEUE','XRAY','VIP','LVL','LEVEL','THE','AND']);
-  let tlTokens=tlNorm.split(' ').filter(t=>t.length>=3&&!stop.has(t));
-  let names=[cas.submittedByNorm,...cas.staffNorms].filter(Boolean);
-  return names.some(n=>n.includes(tlNorm)||tlNorm.includes(n)||tlTokens.some(t=>n.includes(t)));
-}
-function scoreMatch(p,cas){let flightOk=p.flightNorm===cas.flightNorm;let gateOk=gatesMatch(p.gate,cas.gate);let dd=Math.abs(dayDiff(p.date,cas.flightDate));let dateOk=dd===0,dateNear=dd===1;let tlOk=nameMatches(p.tlNorm,cas);let exact=flightOk&&gateOk&&(dateOk||dateNear)&&tlOk;let possible=flightOk&&gateOk&&(dateOk||dateNear);return{flightOk,gateOk,dateOk,dateNear,tlOk,exact,possible,dd}}
-function runCheck(){try{showMsg('');if(!pbsuWb||!casWb)throw new Error('Please upload both PBSU and CAS REQ Excel files first.');applyDatePickerSelection();let sheet=el('sheetSelect').value;if(!sheet)throw new Error('Please select one PBSU date.');let pbsu=parsePbsuSheet(sheet);parseCas();let results=[];for(let p of pbsu){let pbsuChecked=isPbsuChecked(p.efof);let matches=casRows.map(c=>({cas:c,s:scoreMatch(p,c)})).filter(x=>x.s.possible);let exact=matches.filter(x=>x.s.exact);let chosen=exact.length?exact:matches;let status='not',reason='No CAS submission found by Flight + Gate + Date ±1 day.';if(pbsuChecked){status='submitted';reason='PBSU Column F is TRUE, so this flight is already checked and treated as submitted.'}else if(exact.length){status='submitted';reason='Flight + gate + date matched, and TL matched Submitted By or Staff Employee ID.'}else if(matches.length){status='possible';reason='Flight + gate + date matched, but TL name not found in Submitted By or Staff Employee ID.'}results.push({...p,pbsuChecked,status,reason,matches:chosen.sort((a,b)=>(b.cas.submittedOn?.getTime()||0)-(a.cas.submittedOn?.getTime()||0))})}resultRows=results;showSubmitted=true;el('toggleSubmittedBtn').textContent='Hide submitted rows';render()}catch(err){showMsg(err.message||String(err),'err')}}
-function render(){let q=normText(el('searchBox').value).toUpperCase();let filter=el('statusFilter').value;let rows=resultRows.filter(r=>{if(!showSubmitted&&r.status==='submitted')return false;if(filter!=='all'&&r.status!==filter)return false;let hay=[r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.reason,...r.matches.map(m=>`${m.cas.submittedBy} ${m.cas.flight} ${m.cas.gate} ${dateKey(m.cas.flightDate)}`)].join(' ').toUpperCase();return !q||hay.includes(q)});let tbody=el('resultTable').querySelector('tbody');tbody.innerHTML=rows.map((r,i)=>`<tr class="status-${r.status==='not'?'not':r.status}"><td>${i+1}</td><td>${badge(r.status)}</td><td>${dateKey(r.date)}</td><td>${esc(r.std)}</td><td><b>${esc(r.flight)}</b></td><td>${esc(r.gate)}</td><td>${esc(r.tl)}</td><td>${renderMatches(r)}</td><td>${esc(r.reason)}</td></tr>`).join('');let total=resultRows.length,sub=resultRows.filter(x=>x.status==='submitted').length,poss=resultRows.filter(x=>x.status==='possible').length,not=resultRows.filter(x=>x.status==='not').length;el('stats').classList.remove('hidden');el('stats').innerHTML=`<div class="stat">Total PBSU flights<b>${total}</b></div><div class="stat ok">Submitted<b>${sub}</b></div><div class="stat warn">Possible match<b>${poss}</b></div><div class="stat bad">Need chase<b>${not}</b></div>`;el('resultArea').classList.remove('hidden')}
-function badge(s){return s==='submitted'?'<span class="pill ok">✅ Submitted</span>':s==='possible'?'<span class="pill warn">⚠️ Possible</span>':'<span class="pill bad">❌ Not submitted</span>'}
-function esc(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-function renderMatches(r){if(!r.matches.length){return r.pbsuChecked?'<span class="pill ok">PBSU Column F = TRUE</span><div class="small">Already checked in PBSU file. No CAS row required for status.</div>':'<span class="small">No matched CAS row</span>'}return (r.pbsuChecked?'<span class="pill ok">PBSU Column F = TRUE</span><div class="small">Already checked in PBSU file. CAS match shown below if available.</div>':'')+r.matches.map(x=>`<div class="matchbox"><b>${esc(x.cas.submittedBy)}</b><div class="small">CAS row ${x.cas.sourceRow} · ${esc(x.cas.ref)} · Submitted ${dateKey(x.cas.submittedOn)} ${x.cas.submittedOn?String(x.cas.submittedOn).slice(16,21):''}</div><div class="small">Flight ${esc(x.cas.flight)} · Gate ${esc(x.cas.gate)} · Flight date ${dateKey(x.cas.flightDate)}</div><div class="small">Staff J: ${esc(x.cas.staffNames.join(', '))}</div></div>`).join('')}
-function chaseText(){return resultRows.filter(r=>r.status!=='submitted').map(r=>`${r.status==='possible'?'POSSIBLE':'NOT SUBMITTED'} | ${dateKey(r.date)} | ${r.std} | ${r.flight} | ${r.gate} | ${r.tl}`).join('\n')}
-function exportCsv(){let head=['Status','PBSU Date','STD','Flight','Gate','TL','PBSU Column F','Reason','CAS Submitted By','CAS Submitted On','CAS Flight Date','CAS Flight','CAS Gate','CAS Staff J'];let lines=[head];for(let r of resultRows){if(!showSubmitted&&r.status==='submitted')continue;if(!r.matches.length)lines.push([r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.efof,r.reason,'','','','','','']);else for(let m of r.matches)lines.push([r.status,dateKey(r.date),r.std,r.flight,r.gate,r.tl,r.efof,r.reason,m.cas.submittedBy,dateKey(m.cas.submittedOn),dateKey(m.cas.flightDate),m.cas.flight,m.cas.gate,m.cas.staffNames.join('; ')])}let csv=lines.map(a=>a.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');let blob=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='T2_EFOF_Check_Result.csv';a.click();URL.revokeObjectURL(url)}
-el('pbsuFile').addEventListener('change',async e=>{try{const file=e.target.files&&e.target.files[0];if(!file)return;el('pbsuFileName').textContent=file.name;pbsuWb=await readFile(file);rebuildDatePicker();el('pbsuInfo').innerHTML=`<div class="success">Loaded ${pbsuWb.SheetNames.length} PBSU date tabs. Calendar picker auto-selected latest available date.</div>`}catch(err){el('pbsuInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
-el('casFile').addEventListener('change',async e=>{try{const file=e.target.files&&e.target.files[0];if(!file)return;el('casFileName').textContent=file.name;casWb=await readFile(file);parseCas();el('casInfo').innerHTML=`<div class="success">Loaded ${casRows.length} CAS submissions after duplicate same-submitter cleanup.</div>`}catch(err){el('casInfo').innerHTML=`<div class="err">${esc(err.message)}</div>`}})
-el('datePicker').addEventListener('change',applyDatePickerSelection);el('runBtn').addEventListener('click',runCheck);el('searchBox').addEventListener('input',render);el('statusFilter').addEventListener('change',render);el('toggleSubmittedBtn').addEventListener('click',()=>{showSubmitted=!showSubmitted;el('toggleSubmittedBtn').textContent=showSubmitted?'Hide submitted rows':'Show submitted rows';render()});el('copyBtn').addEventListener('click',async()=>{let t=chaseText();if(!t)return showMsg('No TL to chase.');await navigator.clipboard.writeText(t);showMsg('Chase list copied. Paste into WhatsApp/Teams/email.')});el('exportCsvBtn').addEventListener('click',exportCsv);
+
+    // FIXED YEAR LOGIC[cite: 1]
+    function parseSheetDate(name) {
+        var cleanName = name.replace(/(st|nd|rd|th)/gi, '').trim();
+        var hasYear = /\d{2}$|\d{4}$/.test(cleanName);
+        var d = new Date(cleanName);
+        if (isNaN(d.getTime())) return null;
+
+        // If no year found in the name, force it to 2025[cite: 1]
+        if (!hasYear) {
+            d.setFullYear(2025);
+        }
+        return d;
+    }
+
+    function toDateStr(val) {
+        if (!val) return "";
+        var d = null;
+        if (val instanceof Date) d = val;
+        else if (typeof val === 'number') d = new Date((val - 25569) * 86400 * 1000);
+        else {
+            var s = val.toString().trim();
+            var parts = s.split(/[\/\-\. ]/);
+            if (parts.length >= 3) {
+                if (parts[0].length === 4) d = new Date(parts[0], parts[1]-1, parts[2]);
+                else d = new Date(parts[2], parts[1]-1, parts[0]);
+            } else d = new Date(s);
+        }
+        if (!d || isNaN(d.getTime())) return "";
+        return String(d.getDate()).padStart(2, '0') + "/" + String(d.getMonth() + 1).padStart(2, '0') + "/" + d.getFullYear();
+    }
+
+    function toggleSelectAll(master) {
+        var checkboxes = document.getElementsByClassName('row-checkbox');
+        for (var i = 0; i < checkboxes.length; i++) checkboxes[i].checked = master.checked;
+    }
+
+    function copyTicked() {
+        var selectedDate = document.getElementById('datePicker').value;
+        var displayDate = toDateStr(new Date(selectedDate));
+        var checkboxes = document.getElementsByClassName('row-checkbox');
+        var lines = ["Date: " + displayDate];
+        var count = 0;
+
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                var std = checkboxes[i].getAttribute('data-std').replace(/[^0-9]/g, '').substring(0,4).padStart(4, '0');
+                var flight = checkboxes[i].getAttribute('data-flight');
+                var gate = checkboxes[i].getAttribute('data-gate');
+                var tl = checkboxes[i].getAttribute('data-tl');
+                lines.push(std + " " + flight + " " + gate + " " + tl);
+                count++;
+            }
+        }
+        if (count === 0) { alert("No rows ticked!"); return; }
+        navigator.clipboard.writeText(lines.join('\n')).then(function() { alert("Copied " + count + " rows!"); });
+    }
+
+    function toggleUpdatedFilter() {
+        hideUpdated = !hideUpdated;
+        var btn = document.getElementById('toggleHideUpdated');
+        btn.innerText = hideUpdated ? "Showing: Pending Only" : "Hide Updated Remarks";
+        btn.classList.toggle('active', hideUpdated);
+        if (pbsuWb) runCheck();
+    }
+
+    document.getElementById('pbsuFile').onchange = function(e) {
+        var file = e.target.files[0]; document.getElementById('pbsuLabel').innerText = file.name;
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+            pbsuWb = XLSX.read(evt.target.result, { type: 'binary', cellDates: true });
+            sheetDateMap = {};
+            var dates = [];
+            pbsuWb.SheetNames.forEach(function(n) {
+                var d = parseSheetDate(n);
+                if (d) {
+                    var offsetDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
+                    var iso = offsetDate.toISOString().split('T')[0];
+                    sheetDateMap[iso] = n;
+                    dates.push(d);
+                }
+            });
+            if (dates.length > 0) {
+                dates.sort(function(a,b){ return b-a; }); 
+                var latest = new Date(dates[0].getTime() - (dates[0].getTimezoneOffset() * 60000));
+                document.getElementById('datePicker').value = latest.toISOString().split('T')[0];
+                document.getElementById('ui').style.display = 'block';
+            } else { alert("No valid date tabs found in PBSU file!"); }
+        };
+        reader.readAsBinaryString(file);
+    };
+
+    document.getElementById('casFile').onchange = function(e) {
+        var file = e.target.files[0]; document.getElementById('casLabel').innerText = file.name;
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+            var wb = XLSX.read(evt.target.result, { type: 'binary', cellDates: true });
+            casData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: "A", defval: "" });
+        };
+        reader.readAsBinaryString(file);
+    };
+
+    function runCheck() {
+        var isoDate = document.getElementById('datePicker').value;
+        var sheetName = sheetDateMap[isoDate];
+        if (!sheetName) { alert("No exact tab found for this date!"); return; }
+
+        var rows = XLSX.utils.sheet_to_json(pbsuWb.Sheets[sheetName], { header: "A", range: 4, defval: "" });
+        var baseDate = new Date(isoDate);
+        var tbody = document.getElementById('resultsBody'); tbody.innerHTML = '';
+        var lastStd = -1, dayOff = 0, stats = { total: 0, hidden: 0 };
+
+        rows.forEach(function(r, i) {
+            var pFlight = clean(r['C']), pGate = clean(r['D']), pTL = r['E'] ? r['E'].toString().trim() : "";
+            var pStdRaw = r['B'] ? r['B'].toString().trim().split('\n')[0] : "";
+            var pColF = r['F'];
+            if (!pFlight || !pStdRaw) return;
+
+            var isUpdated = (pColF === true || pColF === 1 || pColF === "TRUE");
+            if (hideUpdated && isUpdated) { stats.hidden++; return; }
+
+            var curNum = parseInt(pStdRaw.replace(/[^0-9]/g, '').substring(0,4));
+            if (lastStd > 2000 && curNum < 500) dayOff++;
+            lastStd = curNum;
+
+            var fDate = new Date(baseDate); fDate.setDate(fDate.getDate() + dayOff);
+            var fDateStr = toDateStr(fDate);
+            var win = [fDateStr, toDateStr(new Date(fDate.getTime() + 86400000)), toDateStr(new Date(fDate.getTime() + 172800000))];
+
+            var bestMatch = null, diagHtml = "";
+            var candidates = casData.filter(function(c) { return clean(c['L']) === pFlight; });
+
+            if (candidates.length > 0) {
+                diagHtml = "<b>" + candidates.length + " found:</b>";
+                for (var j = 0; j < candidates.length; j++) {
+                    var m = candidates[j];
+                    var cDate = toDateStr(m['K']);
+                    var isDate = (win.indexOf(cDate) !== -1);
+                    var pNames = cleanTL(pTL).split(' ').filter(function(x){return x.length > 2;});
+                    var cSearch = ((m['C']||"") + " " + (m['J']||"")).toUpperCase();
+                    var isTL = pNames.some(function(n){ return cSearch.indexOf(n) !== -1; });
+                    var isGate = (clean(m['O']).indexOf(pGate.substring(0,3)) !== -1 || pGate.indexOf(clean(m['O']).substring(0,3)) !== -1);
+                    
+                    diagHtml += "<div class='diag-row'>Row " + m['A'] + ": Date " + (isDate?'<b style="color:green">OK</b>':'<b style="color:red">FAIL</b>') + " ("+(cDate||"??")+") | TL " + (isTL?'<b style="color:green">OK</b>':'<b style="color:red">FAIL</b>') + " ("+(m['C']||"??")+") | Gate " + (isGate?'<b style="color:green">OK</b>':'<b style="color:red">FAIL</b>') + " ("+(m['O']||"??")+")</div>";
+                    if (isDate && isTL) { bestMatch = m; break; }
+                }
+            } else { diagHtml = "<i>No flight match.</i>"; }
+
+            var tr = document.createElement('tr');
+            tr.style.backgroundColor = bestMatch ? '#effaf2' : '#fff9f9';
+            tr.innerHTML = '<td class="chk-col"><input type="checkbox" class="row-checkbox" data-std="'+pStdRaw+'" data-flight="'+r['C']+'" data-gate="'+r['D']+'" data-tl="'+pTL+'"></td>' +
+                '<td>' + (i+1) + '</td>' +
+                '<td><span class="pill ' + (bestMatch ? 'bg-ok' : 'bg-bad') + '">' + (bestMatch ? '✅ SUBMITTED' : '❌ MISSING') + '</span></td>' +
+                '<td><span class="' + (isUpdated?'remark-updated':'remark-pending') + '">' + (isUpdated?'Updated':'Pending') + '</span></td>' +
+                '<td>' + fDateStr + '</td><td>' + pStdRaw + '</td><td><b>' + r['C'] + '</b></td><td>' + r['D'] + '</td><td>' + pTL + '</td>' +
+                '<td>' + (bestMatch ? '<div class="match-card"><b>VERIFIED</b>: ' + bestMatch['C'] + ' (Row ' + bestMatch['A'] + ')</div>' : diagHtml) + '</td>';
+            tbody.appendChild(tr);
+            stats.total++;
+        });
+        document.getElementById('resTable').style.display = 'table';
+        document.getElementById('statsBar').style.display = 'block';
+        document.getElementById('statsBar').innerText = "Showing " + stats.total + " flights" + (stats.hidden > 0 ? " (" + stats.hidden + " Updated hidden)" : "");
+    }
 </script>
 </body>
 </html>
