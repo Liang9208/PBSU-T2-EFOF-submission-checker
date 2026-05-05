@@ -5,46 +5,80 @@
     <title>PBSU T2 EFOF Submission Checker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --bg: #f5f5f7; --card: #fff; --line: #e1e1e1; --text: #1d1d1f; --ok: #28a745; --bad: #d93025; --blue: #0066cc; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #333; margin: 20px; font-size: 13px; }
-        .container { max-width: 1550px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        :root { 
+            --bg: #f5f5f7; --card: #fff; --line: #e1e1e1; --text: #1d1d1f; 
+            --ok: #28a745; --bad: #d93025; --blue: #0066cc; 
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); color: #333; margin: 20px; font-size: 15px; 
+        }
+        .container { 
+            max-width: 1650px; margin: auto; background: #fff; padding: 30px; 
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .uploadBox { border: 2px dashed #bbb; padding: 25px; text-align: center; cursor: pointer; border-radius: 10px; background: #fff; display: block; transition: 0.2s; }
+        .uploadBox { 
+            border: 2px dashed #bbb; padding: 25px; text-align: center; cursor: pointer; 
+            border-radius: 10px; background: #fff; display: block; transition: 0.2s; 
+        }
         .uploadBox:hover { border-color: var(--blue); background: #f0f7ff; }
         input[type=file] { display: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
-        th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid var(--line); position: sticky; top: 0; z-index: 10; font-size: 11px; text-transform: uppercase; color: #666; }
-        td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; word-wrap: break-word; }
-        .pill { padding: 4px 10px; border-radius: 20px; font-weight: bold; color: white; font-size: 10px; }
-        .bg-ok { background: var(--ok); }
-        .bg-bad { background: var(--bad); }
-        .remark-updated { color: var(--ok); font-weight: bold; }
-        .remark-pending { color: #888; font-style: italic; }
-        .ok-text { color: var(--ok); font-weight: bold; }
-        .fail-text { color: var(--bad); font-weight: bold; }
-        .diag-row { background: #fdfdfd; border: 1px solid #eee; padding: 8px; border-radius: 6px; margin-bottom: 6px; font-family: 'Courier New', monospace; font-size: 11px; }
-        .match-card { background: #f0fdf4; border-left: 5px solid var(--ok); padding: 12px; border-radius: 4px; }
-        .btn-action { padding: 11px 20px; border-radius: 7px; cursor: pointer; font-weight: bold; border: none; margin-left: 10px; transition: 0.2s; }
+
+        #ui { display:none; text-align:center; padding: 25px; background: #f9f9f9; border-radius: 10px; margin-bottom: 25px; }
+        label { font-weight: bold; font-size: 16px; }
+        #datePicker { padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-size: 15px; margin: 0 10px; }
+
+        .btn-action { padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; margin: 5px; transition: 0.2s; font-size: 15px; }
         .btn-blue { background: var(--blue); color: white; }
         .btn-copy { background: #28a745; color: white; }
         .btn-toggle { background: #6c757d; color: white; }
         .btn-toggle.active { background: #111; }
-        .chk-col { width: 30px; text-align: center; }
-        #datePicker { padding: 9px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold; font-family: inherit; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; table-layout: fixed; }
+        th { 
+            background: #f8f9fa; padding: 15px 10px; text-align: left; border-bottom: 2px solid var(--line); 
+            position: sticky; top: 0; z-index: 10; font-size: 13px; text-transform: uppercase; color: #555; 
+        }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; word-wrap: break-word; }
+        
+        .pill { padding: 6px 12px; border-radius: 20px; font-weight: bold; color: white; font-size: 11px; text-transform: uppercase; }
+        .bg-ok { background: var(--ok); }
+        .bg-bad { background: var(--bad); }
+        .remark-updated { color: var(--ok); font-weight: bold; }
+        .remark-pending { color: #888; font-style: italic; }
+
+        .diag-container { display: flex; flex-direction: column; gap: 8px; }
+        .diag-row { 
+            background: #ffffff; border: 1px solid #ddd; padding: 12px; border-radius: 10px; 
+            font-family: "Courier New", monospace; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            line-height: 1.6;
+        }
+        .ok-tag { color: var(--ok); font-weight: 900; }
+        .fail-tag { color: var(--bad); font-weight: 900; }
+        .val-blue { color: #0056b3; font-weight: bold; }
+
+        .match-card { 
+            background: #f0fdf4; border-left: 6px solid var(--ok); padding: 15px; 
+            border-radius: 8px; font-size: 15px; color: #1e4620;
+        }
+
+        .chk-col { width: 40px; text-align: center; }
+        #statsBar { font-size: 16px; margin: 15px 0; font-weight: bold; color: var(--blue); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>PBSU T2 EFOF Submission Checker</h2>
-
+    <h2 style="font-size: 24px; margin-bottom: 20px;">PBSU T2 EFOF Submission Checker</h2>
+    
     <div class="grid">
-        <label class="uploadBox"><input type="file" id="pbsuFile"><div id="pbsuLabel">📁 1. PBSU T2 EFOF DATA</div></label>
-        <label class="uploadBox"><input type="file" id="casFile"><div id="casLabel">📄 2. CAS REQ - EFOF</div></label>
+        <label class="uploadBox"><input type="file" id="pbsuFile"><div id="pbsuLabel">📁 1. PBSU T2 EFOF DATA (Excel)</div></label>
+        <label class="uploadBox"><input type="file" id="casFile"><div id="casLabel">📄 2. CAS REQ - EFOF (Export)</div></label>
     </div>
     
-    <div id="ui" style="display:none; text-align:center; padding: 20px; background: #f9f9f9; border-radius: 10px; margin-bottom: 20px;">
-        <label style="font-weight:bold; margin-right: 10px;">Select Flight Date:</label>
+    <div id="ui">
+        <label>Select Flight Date:</label>
         <input type="date" id="datePicker">
         
         <button onclick="runCheck()" class="btn-action btn-blue">Check Status</button>
@@ -52,21 +86,21 @@
         <button onclick="copyTicked()" class="btn-action btn-copy">📋 Copy Ticked Data</button>
     </div>
     
-    <div id="statsBar" style="display:none; margin: 15px 0; font-weight: bold; color: var(--blue);"></div>
+    <div id="statsBar" style="display:none;"></div>
 
     <table id="resTable" style="display:none;">
         <thead>
             <tr>
                 <th class="chk-col"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                <th style="width: 20px;">#</th>
-                <th style="width: 100px;">Submission</th>
-                <th style="width: 80px;">Remark (F)</th>
-                <th style="width: 70px;">Flight Date</th>
-                <th style="width: 50px;">STD</th>
-                <th style="width: 70px;">Flight</th>
-                <th style="width: 60px;">Gate</th>
-                <th style="width: 180px;">Team Leader (TL)</th>
-                <th>Diagnostic Result</th>
+                <th style="width: 40px;">#</th>
+                <th style="width: 120px;">Submission</th>
+                <th style="width: 100px;">Remark (F)</th>
+                <th style="width: 110px;">Flight Date</th>
+                <th style="width: 70px;">STD</th>
+                <th style="width: 90px;">Flight</th>
+                <th style="width: 80px;">Gate</th>
+                <th style="width: 200px;">Team Leader (TL)</th>
+                <th style="width: auto;">Diagnostic Cross-Check Result</th>
             </tr>
         </thead>
         <tbody id="resultsBody"></tbody>
@@ -87,17 +121,12 @@
             .replace(/[^A-Z]/g, ' ').trim();
     }
 
-    // FIXED YEAR LOGIC[cite: 1]
     function parseSheetDate(name) {
         var cleanName = name.replace(/(st|nd|rd|th)/gi, '').trim();
         var hasYear = /\d{2}$|\d{4}$/.test(cleanName);
         var d = new Date(cleanName);
         if (isNaN(d.getTime())) return null;
-
-        // If no year found in the name, force it to 2025[cite: 1]
-        if (!hasYear) {
-            d.setFullYear(2025);
-        }
+        if (!hasYear) { d.setFullYear(2025); }
         return d;
     }
 
@@ -141,13 +170,13 @@
             }
         }
         if (count === 0) { alert("No rows ticked!"); return; }
-        navigator.clipboard.writeText(lines.join('\n')).then(function() { alert("Copied " + count + " rows!"); });
+        navigator.clipboard.writeText(lines.join('\n')).then(function() { alert("Copied " + count + " rows to clipboard!"); });
     }
 
     function toggleUpdatedFilter() {
         hideUpdated = !hideUpdated;
         var btn = document.getElementById('toggleHideUpdated');
-        btn.innerText = hideUpdated ? "Showing: Pending Only" : "Hide Updated Remarks";
+        btn.innerText = hideUpdated ? "Showing: Pending Only" : "Hide Updated Flight";
         btn.classList.toggle('active', hideUpdated);
         if (pbsuWb) runCheck();
     }
@@ -157,8 +186,7 @@
         var reader = new FileReader();
         reader.onload = function(evt) {
             pbsuWb = XLSX.read(evt.target.result, { type: 'binary', cellDates: true });
-            sheetDateMap = {};
-            var dates = [];
+            sheetDateMap = {}; var dates = [];
             pbsuWb.SheetNames.forEach(function(n) {
                 var d = parseSheetDate(n);
                 if (d) {
@@ -169,11 +197,11 @@
                 }
             });
             if (dates.length > 0) {
-                dates.sort(function(a,b){ return b-a; }); 
+                dates.sort(function(a,b){ return b-a; });
                 var latest = new Date(dates[0].getTime() - (dates[0].getTimezoneOffset() * 60000));
                 document.getElementById('datePicker').value = latest.toISOString().split('T')[0];
                 document.getElementById('ui').style.display = 'block';
-            } else { alert("No valid date tabs found in PBSU file!"); }
+            }
         };
         reader.readAsBinaryString(file);
     };
@@ -213,13 +241,25 @@
 
             var fDate = new Date(baseDate); fDate.setDate(fDate.getDate() + dayOff);
             var fDateStr = toDateStr(fDate);
-            var win = [fDateStr, toDateStr(new Date(fDate.getTime() + 86400000)), toDateStr(new Date(fDate.getTime() + 172800000))];
+            
+            // SEARCH WINDOW: Day - 1 to Day + 2
+            var win = [
+                toDateStr(new Date(fDate.getTime() - 86400000)), // One day before
+                fDateStr,
+                toDateStr(new Date(fDate.getTime() + 86400000)),
+                toDateStr(new Date(fDate.getTime() + 172800000))
+            ];
 
             var bestMatch = null, diagHtml = "";
-            var candidates = casData.filter(function(c) { return clean(c['L']) === pFlight; });
+            
+            // STRICT WINDOW FILTERING: Only consider rows that match flight AND fall within window
+            var candidates = casData.filter(function(c) { 
+                var cDate = toDateStr(c['K']);
+                return clean(c['L']) === pFlight && win.indexOf(cDate) !== -1; 
+            });
 
             if (candidates.length > 0) {
-                diagHtml = "<b>" + candidates.length + " found:</b>";
+                diagHtml = "<div class='diag-container'>";
                 for (var j = 0; j < candidates.length; j++) {
                     var m = candidates[j];
                     var cDate = toDateStr(m['K']);
@@ -229,10 +269,11 @@
                     var isTL = pNames.some(function(n){ return cSearch.indexOf(n) !== -1; });
                     var isGate = (clean(m['O']).indexOf(pGate.substring(0,3)) !== -1 || pGate.indexOf(clean(m['O']).substring(0,3)) !== -1);
                     
-                    diagHtml += "<div class='diag-row'>Row " + m['A'] + ": Date " + (isDate?'<b style="color:green">OK</b>':'<b style="color:red">FAIL</b>') + " ("+(cDate||"??")+") | TL " + (isTL?'<b style="color:green">OK</b>':'<b style="color:red">FAIL</b>') + " ("+(m['C']||"??")+") | Gate " + (isGate?'<b style="color:green">OK</b>':'<b style="color:red">FAIL</b>') + " ("+(m['O']||"??")+")</div>";
+                    diagHtml += "<div class='diag-row'><b>Row " + m['A'] + ":</b> Date <span class='ok-tag'>OK</span> ("+cDate+") | TL " + (isTL?'<span class="ok-tag">OK</span>':'<span class="fail-tag">FAIL</span>') + " ("+(m['C']||"??")+") | Gate " + (isGate?'<span class="ok-tag">OK</span>':'<span class="fail-tag">FAIL</span>') + " ("+(m['O']||"??")+")</div>";
                     if (isDate && isTL) { bestMatch = m; break; }
                 }
-            } else { diagHtml = "<i>No flight match.</i>"; }
+                diagHtml += "</div>";
+            } else { diagHtml = "<i style='color:#999'>No submission found for Flight " + r['C'] + " between " + win[0] + " and " + win[3] + "</i>"; }
 
             var tr = document.createElement('tr');
             tr.style.backgroundColor = bestMatch ? '#effaf2' : '#fff9f9';
@@ -241,13 +282,13 @@
                 '<td><span class="pill ' + (bestMatch ? 'bg-ok' : 'bg-bad') + '">' + (bestMatch ? '✅ SUBMITTED' : '❌ MISSING') + '</span></td>' +
                 '<td><span class="' + (isUpdated?'remark-updated':'remark-pending') + '">' + (isUpdated?'Updated':'Pending') + '</span></td>' +
                 '<td>' + fDateStr + '</td><td>' + pStdRaw + '</td><td><b>' + r['C'] + '</b></td><td>' + r['D'] + '</td><td>' + pTL + '</td>' +
-                '<td>' + (bestMatch ? '<div class="match-card"><b>VERIFIED</b>: ' + bestMatch['C'] + ' (Row ' + bestMatch['A'] + ')</div>' : diagHtml) + '</td>';
+                '<td>' + (bestMatch ? '<div class="match-card"><b>VERIFIED SUBMISSION</b><br>Submitted By: <span class="val-blue">' + bestMatch['C'] + '</span> (Row ' + bestMatch['A'] + ')</div>' : diagHtml) + '</td>';
             tbody.appendChild(tr);
             stats.total++;
         });
         document.getElementById('resTable').style.display = 'table';
         document.getElementById('statsBar').style.display = 'block';
-        document.getElementById('statsBar').innerText = "Showing " + stats.total + " flights" + (stats.hidden > 0 ? " (" + stats.hidden + " Updated hidden)" : "");
+        document.getElementById('statsBar').innerText = "Total: " + stats.total + " flights" + (stats.hidden > 0 ? " (Hidden " + stats.hidden + " Updated rows)" : "");
     }
 </script>
 </body>
